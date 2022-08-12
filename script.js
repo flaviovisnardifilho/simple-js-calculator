@@ -47,7 +47,10 @@ function evaluateDisplay() {
   let sortedDisplay = display.textContent.split(/[\+|\-|\*|\/]/);
   sortedDisplay.map((e) => Number(e));
 
-  testErrors()
+  // Stop calculation
+  if (testErrors()) {
+    return;
+  }
 }
 
 function findCharIndex(op) {
@@ -64,17 +67,21 @@ function findCharIndex(op) {
 function testErrors() {
   operators = ['+', '-', '*', '/'];
 
-  // Only 1 number inserted
-  if (display.textContent.split(/[\+|\-|\*|\/]/).length < 1){
-    display.textContent = display.textContent.split(/[\+|\-|\*|\/]/)
+  disp = display.textContent;
+
+  // Only 1 number inserted if only 1 operator
+  if (disp.split(/[\+\-\*\/]/).length < 3) {
+    display.textContent = display.textContent.split(/[\+\-\*\/]/)[0];
+    return true;
   }
-  // if (display.textContent.match(/^[\+\-\*\/]|[\+\-\*\/]$/)) ||
-  //   ()
-  //   {
-  //   display.textContent = 'ERROR';
-  //   disableButtons();
-  //   // return true;
-  // }
+
+  // Starts or ends with operator , or operator followed by operator
+  if (disp.match(/(^[\+\-\*\/])|([\+\-\*\/]$)|([+\-\*\/]{2})/)) {
+    display.textContent = 'ERROR';
+    // display.textContent = disp.split(/[\+|\-|\*|\/]/).length;
+    disableButtons();
+    return true;
+  }
 }
 
 function compareCharIndex(str) {
