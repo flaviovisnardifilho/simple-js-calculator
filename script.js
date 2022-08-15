@@ -1,10 +1,12 @@
 function add(a, b) {
-  return a + b;
+  // console.log(`a: ${a}, b: ${b}`)
+  return Number(a) + Number(b);
 }
 function subtract(a, b) {
   return a - b;
 }
 function multiply(a, b) {
+  // console.log(`a: ${a}, b: ${b}`)
   return a * b;
 }
 function divide(a, b) {
@@ -44,43 +46,80 @@ function updateDisplay(e) {
 }
 
 function evaluateDisplay() {
-  let sortedDisplay = display.textContent.split(/[\+|\-|\*|\/]/);
-  sortedDisplay.map((e) => Number(e));
-
   // Stop calculation
   if (testErrors()) {
     return;
   }
+
+  const re = /[+\-*\e/]/;
+  let disp = display.textContent;
+  let operatorsList = disp.split(/[0-9.]/).filter((i) => i !== '');
+  let numbersList = disp.split(re);
+
+  if (!operatorsList.length) {
+    return;
+  }
+
+  let result = calculateOrderOperations(operatorsList, numbersList);
+2
+  display.textContent = +result.toFixed(4);
 }
 
-function findCharIndex(op) {
-  substring = [];
-  let string = display.textContent;
-  for (let i = 0; i < string.length; i++) {
-    if (string[i] === op) {
-      substring.push(i);
+function calculateOrderOperations(operatorsList, numbersList) {
+  do {
+    // First multiplication or division
+    for (let i = 0; i < operatorsList.length; i++) {
+      if ((operatorsList[i] === '*') | (operatorsList[i] === '/')) {
+        let result = chooseOperation(
+          operatorsList[i],
+          numbersList[i],
+          numbersList[i + 1]
+        );
+        operatorsList.splice(i, 1), numbersList.splice(i, 2, result);
+      }
     }
-  }
-  return substring;
+    // Sum or subtraction now
+    for (let i = 0; i < operatorsList.length; i++) {
+      if ((operatorsList[i] === '-') | (operatorsList[i] === '+')) {
+        let result = chooseOperation(
+          operatorsList[i],
+          numbersList[i],
+          numbersList[i + 1]
+        );
+        operatorsList.splice(i, 1), numbersList.splice(i, 2, result);
+      }
+    }
+  } while (operatorsList.length > 0);
+  return numbersList[0]
 }
 
 function testErrors() {
-  operators = ['+', '-', '*', '/'];
-
-  disp = display.textContent;
-
-  // Only 1 number inserted if only 1 operator
-  if (disp.split(/[\+\-\*\/]/).length < 3) {
-    display.textContent = display.textContent.split(/[\+\-\*\/]/)[0];
-    return true;
-  }
-
-  // Starts or ends with operator , or operator followed by operator
-  if (disp.match(/(^[\+\-\*\/])|([\+\-\*\/]$)|([+\-\*\/]{2})/)) {
+  // Starts or ends with operator, or operator followed by operator
+  if (display.textContent.match(/(^[+\-*\/])|([+\-*\/]$)|([+\-*\/]{2})/)) {
     display.textContent = 'ERROR';
-    // display.textContent = disp.split(/[\+|\-|\*|\/]/).length;
+
     disableButtons();
     return true;
+  }
+}
+
+function chooseOperation(operator, a, b) {
+  switch (operator) {
+    case '+':
+      return add(a, b);
+      break;
+    case '-':
+      return subtract(a, b);
+      break;
+    case '*':
+      return multiply(a, b);
+      break;
+    case '/':
+      return divide(a, b);
+      break;
+
+    default:
+      break;
   }
 }
 
